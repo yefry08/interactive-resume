@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Interactive resume of Yefry Núñez: explore it as a 2D side-scroller or a 3D sky-island world, with a clickable gallery of projects.">
+<style>[hidden]{display:none!important}html,body{margin:0}</style><title>Yefry Núñez Interactive Resume</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Figtree:wght@400;500;600;700&display=swap">
+
+<style>
+/* Concept: a game-like resume. Intro screen asks 2D (flat side-scroller) or 3D (low-poly sky islands); one shared set of stops, plus a project gallery layer reachable from both. Single committed look: bright sky world, ink-navy outlines, one warm sun accent. */
+:root{
+  --ink:#14213d;
+  --ink-2:#2b3a5c;
+  --muted:#5b6b8a;
+  --paper:#ffffff;
+  --sky:#2eb5f5;
+  --sky-2:#8fdcfb;
+  --sun:#ffb703;
+  --coral:#ff5d73;
+  --leaf:#4cd17a;
+  --grape:#7a5af8;
+  --night:#0b1030;
+  --glass:rgba(11,16,48,.82);
+  --glass-fg:#f2f6ff;
+  --glass-line:rgba(255,255,255,.18);
+  --c-company:#ffb703;
+  --c-safety:#4d8dff;
+  --c-agri:#4cd17a;
+  --c-sust:#1fc8a8;
+  --c-sim:#ff8a3d;
+  --c-health:#ff5d73;
+  --c-web:#9b7bff;
+  --display:'Fredoka',system-ui,sans-serif;
+  --body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:var(--glass-fg);font-family:var(--body)}
+body{
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0;
+}
+button{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
+.theme-glass :focus-visible,.bar :focus-visible,#gallery :focus-visible,#intro :focus-visible,#dots :focus-visible{outline-color:#fff}
+
+#scroller{width:1px;pointer-events:none}
+
+/* ---------- top bar ---------- */
+.bar{
+  position:fixed;z-index:40;top:0;left:0;right:0;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));
+  background:linear-gradient(rgba(11,16,48,.72),rgba(11,16,48,0));
+}
+.brand{font:600 20px var(--display);background:none;border:0;cursor:pointer;color:#fff;padding:6px 4px;margin-right:auto;text-shadow:0 2px 0 rgba(20,33,61,.6)}
+.seg{display:flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+.seg button{border:0;background:transparent;color:var(--ink);font:600 14px var(--body);padding:8px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--sun)}
+.pill{border:2px solid var(--ink);background:#fff;color:var(--ink);font:600 14px var(--body);padding:8px 16px;border-radius:999px;cursor:pointer}
+.pill:hover,.seg button:hover{background:var(--sky-2)}
+.seg button[aria-pressed="true"]:hover{background:var(--sun)}
+@media(max-width:520px){.brand{display:none}.bar{justify-content:space-between}}
+
+/* ---------- intro ---------- */
+#intro{
+  position:fixed;inset:0;z-index:50;overflow:auto;
+  background:linear-gradient(#2eb5f5 0%,#8fdcfb 62%,#d8f3ff 100%);color:var(--ink);
+  padding:calc(env(safe-area-inset-top,0px) + 24px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;
+}
+#intro .ribbon{font:600 13px var(--body);letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:#fff;padding:7px 16px;border-radius:6px}
+#intro h1{font:700 clamp(2.8rem,10vw,6rem)/.95 var(--display);margin:0;color:#fff;text-wrap:balance;
+  text-shadow:0 4px 0 var(--ink),0 8px 0 var(--ink),0 12px 0 rgba(20,33,61,.35)}
+#intro .sub{font:500 18px var(--body);max-width:36ch;margin:0;text-wrap:balance}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,300px));gap:18px;justify-content:center;width:100%}
+@media(max-width:700px){.choices{grid-template-columns:minmax(0,340px)}}
+.choice{
+  background:#fff;border:4px solid var(--ink);border-radius:16px;box-shadow:8px 8px 0 var(--ink);
+  padding:14px 14px 18px;cursor:pointer;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:8px;
+  transition:transform .15s,box-shadow .15s;
+}
+.choice:hover,.choice:focus-visible{transform:translate(-3px,-3px);box-shadow:11px 11px 0 var(--ink)}
+.choice svg{width:100%;height:auto;border-radius:8px;display:block}
+.choice b{font:700 28px var(--display)}
+.choice span{font-size:15px;line-height:1.4;color:var(--ink-2)}
+.linkbtn{background:none;border:0;border-bottom:2px solid var(--ink);color:var(--ink);font:600 15px var(--body);cursor:pointer;padding:2px 0}
+.cloud-a,.cloud-b{position:absolute;background:#fff;border-radius:999px;opacity:.9;pointer-events:none}
+.cloud-a{width:160px;height:46px;top:14%;left:-200px;animation:drift 38s linear infinite}
+.cloud-b{width:110px;height:34px;top:68%;left:-200px;animation:drift 52s linear infinite 8s}
+@keyframes drift{to{transform:translateX(calc(100vw + 420px))}}
+
+/* ---------- worlds ---------- */
+.world{position:fixed;inset:0;z-index:1;overflow:hidden}
+#w2d{background:linear-gradient(#2eb5f5,#9be3fb 72%,#d8f3ff);--charx:300px;--groundh:150px}
+.layer{position:absolute;left:0;right:0;background-repeat:repeat-x;pointer-events:none}
+#l-clouds{top:6%;height:48%;background-size:auto 100%}
+#l-hills{bottom:var(--groundh);height:40%;background-size:auto 100%;background-position-y:bottom}
+#l-trees{bottom:var(--groundh);height:30%;background-size:auto 100%;background-position-y:bottom}
+#grass{position:absolute;left:0;right:0;bottom:calc(var(--groundh) - 14px);height:16px;background:#7ed957;border-top:4px solid var(--ink);z-index:3}
+#dirt{position:absolute;left:0;right:0;bottom:0;height:calc(var(--groundh) - 14px);z-index:3;border-top:4px solid var(--ink);
+  background:repeating-linear-gradient(135deg,#8b5a3c 0 14px,#9a6a47 14px 28px)}
+#l-world{position:absolute;left:0;top:0;bottom:0;width:0;z-index:4;will-change:transform}
+.stop2d{position:absolute;top:0;bottom:0;width:0}
+.stop2d .panel{position:absolute;left:112px;top:calc(env(safe-area-inset-top,0px) + 74px);
+  width:min(500px,calc(100vw - var(--charx) - 140px));max-height:calc(100% - var(--groundh) - 96px - env(safe-area-inset-top,0px));overflow:auto}
+.stop2d .prop{position:absolute;bottom:calc(var(--groundh) - 6px);left:-230px;width:170px;display:block;overflow:visible}
+button.prop{background:none;border:0;padding:0;cursor:pointer}
+button.prop:hover{filter:brightness(1.08)}
+.svgt{font-family:var(--display);font-weight:600}
+#hero2d{position:absolute;z-index:6;left:calc(var(--charx) - 45px);bottom:calc(var(--groundh) - 8px);width:90px;height:170px;pointer-events:none}
+#hero2d svg{width:100%;height:100%;overflow:visible}
+#hero2d .body{animation:bob 1.1s ease-in-out infinite;animation-play-state:paused}
+#hero2d .legL,#hero2d .legR,#hero2d .armL,#hero2d .armR{animation:swing .55s ease-in-out infinite alternate;animation-play-state:paused}
+#hero2d .legL{transform-origin:36px 108px}
+#hero2d .legR{transform-origin:54px 108px;animation-direction:alternate-reverse}
+#hero2d .armL{transform-origin:24px 62px;animation-direction:alternate-reverse}
+#hero2d .armR{transform-origin:66px 62px}
+#hero2d.walking .body,#hero2d.walking .legL,#hero2d.walking .legR,#hero2d.walking .armL,#hero2d.walking .armR{animation-play-state:running}
+@keyframes swing{from{transform:rotate(-26deg)}to{transform:rotate(26deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media(max-width:700px){
+  #w2d{--charx:22vw}
+  .stop2d .panel{left:calc(14px - var(--charx));width:calc(100vw - 28px);max-height:calc(52% - env(safe-area-inset-top,0px));top:calc(env(safe-area-inset-top,0px) + 64px)}
+  .stop2d .prop{display:none}
+}
+
+#w3d{background:#37b6f2}
+#c3d{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+#panels3d{position:absolute;inset:0;pointer-events:none}
+button.prop svg{width:100%;height:auto;display:block}
+.p3{pointer-events:none;position:absolute;top:50%;width:min(460px,44vw);max-height:calc(100% - 150px);overflow:auto;transform:translateY(-50%)}
+.p3.left{left:max(16px,5vw)}
+.p3.right{right:max(16px,5vw)}
+@media(max-width:760px){
+  .p3{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 52px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto;max-height:46%;transform:none}
+  .p3.left,.p3.right{left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px))}
+}
+
+/* ---------- panel cards ---------- */
+.panel{opacity:0;pointer-events:none;will-change:opacity,transform}
+.panel.on{pointer-events:auto}
+.card{padding:20px 22px 22px;font-size:15.5px;line-height:1.55}
+.theme-paper .card{background:var(--paper);color:var(--ink);border:4px solid var(--ink);border-radius:14px;box-shadow:8px 8px 0 var(--ink)}
+.theme-glass .card{background:var(--glass);color:var(--glass-fg);border:1px solid var(--glass-line);border-radius:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card .eyebrow{display:inline-block;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;background:var(--ac,var(--sun));color:var(--ink);padding:4px 10px;border-radius:999px;margin:0 0 10px}
+.card h1,.card h2{font-family:var(--display);font-weight:600;margin:0 0 8px;line-height:1.05;text-wrap:balance}
+.card h1{font-size:clamp(2.2rem,5vw,3.2rem);font-weight:700}
+.card h2{font-size:clamp(1.55rem,3.4vw,2.1rem)}
+.card p{margin:0 0 10px;max-width:60ch}
+.card .role{font:600 17px var(--body);margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 0;padding:0;list-style:none}
+.chip{display:inline-block;padding:4px 11px;border-radius:999px;border:2px solid currentColor;font-weight:600;font-size:13px}
+.hint{margin-top:12px;font-weight:600;font-size:14px;opacity:.75}
+.rows{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px}
+.rows li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 14px;align-items:baseline}
+.rows b{font-weight:700}
+.rows .m{opacity:.7;font-size:14px;text-align:right}
+.rows .full{grid-column:1/-1;opacity:.75;font-size:14px}
+.sub-h{font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;opacity:.65;margin:14px 0 4px}
+.btn{font:700 15px var(--body);padding:10px 18px;border-radius:999px;border:2px solid var(--ink);background:var(--sun);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(1.07)}
+.btn.alt{background:#fff}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.mail{display:block;font:600 18px/1.3 var(--body);background:rgba(127,127,127,.14);border-radius:8px;padding:8px 12px;margin:6px 0 4px;word-break:break-all;user-select:all}
+
+/* ---------- progress dots ---------- */
+#dots{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);display:flex;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(11,16,48,.72)}
+#dots button{width:14px;height:14px;border-radius:50%;border:2px solid #fff;background:transparent;padding:0;cursor:pointer}
+#dots button[aria-current="step"]{background:var(--sun);border-color:var(--sun);transform:scale(1.25)}
+.scrollhint{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 54px);font:600 13px var(--body);color:#fff;background:rgba(11,16,48,.72);padding:6px 12px;border-radius:999px;pointer-events:none;transition:opacity .4s}
+
+/* ---------- gallery ---------- */
+#gallery{position:fixed;inset:0;z-index:60;background:rgba(8,14,36,.96);overflow:auto;color:var(--glass-fg)}
+.g-in{max-width:1180px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 18px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 32px) max(16px,env(safe-area-inset-left,0px))}
+.g-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.g-head h2{font:700 clamp(1.8rem,5vw,2.6rem)/1 var(--display);margin:0 auto 0 0}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.filters button{border:2px solid rgba(255,255,255,.35);background:transparent;color:#fff;font:600 13px var(--body);padding:6px 13px;border-radius:999px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--sun);border-color:var(--sun);color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.tile{display:flex;flex-direction:column;min-width:0;text-decoration:none;background:#121b3d;border:1px solid var(--glass-line);border-radius:14px;overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s}
+.tile:hover,.tile:focus-visible{transform:translateY(-5px);border-color:var(--ac);box-shadow:0 14px 30px rgba(0,0,0,.45)}
+.thumb{position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.thumb .top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:6px;padding:7px 10px;background:rgba(0,0,0,.28)}
+.thumb .top i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.55)}
+.thumb .top span{margin-left:6px;font:500 11px/1 ui-monospace,Consolas,monospace;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb svg{width:44%;height:auto;margin-top:16px;fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.meta{padding:12px 14px 15px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tag{align-self:flex-start;font:700 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--ac);color:var(--ink)}
+.meta b{font:600 18px var(--display);line-height:1.15}
+.meta span{font-size:13.5px;line-height:1.4;opacity:.75}
+
+#toast{position:fixed;z-index:80;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);background:var(--ink);color:#fff;font:600 14px var(--body);padding:10px 16px;border-radius:10px;max-width:calc(100vw - 32px)}
+
+@media(prefers-reduced-motion:reduce){
+  .cloud-a,.cloud-b{animation:none}
+  #hero2d .body,#hero2d .legL,#hero2d .legR,#hero2d .armL,#hero2d .armR{animation:none!important}
+  .tile,.choice{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div id="scroller" aria-hidden="true"></div>
+
+<header class="bar" id="bar" hidden>
+  <button class="brand" id="brand" type="button" title="Back to mode choice">Yefry Núñez</button>
+  <div class="seg" role="group" aria-label="Experience mode">
+    <button type="button" id="m2d" aria-pressed="false">2D</button>
+    <button type="button" id="m3d" aria-pressed="false">3D</button>
+  </div>
+  <button class="pill" type="button" id="openGal">Projects</button>
+</header>
+
+<main>
+<section class="world theme-paper" id="w2d" hidden aria-label="2D resume world">
+  <div class="layer" id="l-clouds"></div>
+  <div class="layer" id="l-hills"></div>
+  <div class="layer" id="l-trees"></div>
+  <div id="l-world"></div>
+  <div id="grass"></div>
+  <div id="dirt"></div>
+  <div id="hero2d" aria-hidden="true">
+    <svg viewBox="0 0 90 170">
+      <g class="body">
+        <g class="armL"><rect x="14" y="56" width="14" height="46" rx="7" fill="#ff9f1c" stroke="#14213d" stroke-width="3"/><circle cx="21" cy="104" r="7" fill="#c68a5e" stroke="#14213d" stroke-width="3"/></g>
+        <g class="legL"><rect x="28" y="104" width="16" height="50" rx="6" fill="#2f6fed" stroke="#14213d" stroke-width="3"/><rect x="24" y="150" width="26" height="12" rx="6" fill="#fff" stroke="#14213d" stroke-width="3"/></g>
+        <g class="legR"><rect x="46" y="104" width="16" height="50" rx="6" fill="#2f6fed" stroke="#14213d" stroke-width="3"/><rect x="42" y="150" width="26" height="12" rx="6" fill="#fff" stroke="#14213d" stroke-width="3"/></g>
+        <rect x="22" y="52" width="46" height="62" rx="14" fill="#ff9f1c" stroke="#14213d" stroke-width="3"/>
+        <g class="armR"><rect x="62" y="56" width="14" height="46" rx="7" fill="#ff9f1c" stroke="#14213d" stroke-width="3"/><circle cx="69" cy="104" r="7" fill="#c68a5e" stroke="#14213d" stroke-width="3"/></g>
+        <circle cx="45" cy="32" r="22" fill="#c68a5e" stroke="#14213d" stroke-width="3"/>
+        <path d="M23 30 C21 8 40 4 52 8 C66 10 70 22 67 32 C62 24 52 20 40 22 C32 23 26 26 23 30Z" fill="#1b1b1b" stroke="#14213d" stroke-width="3" stroke-linejoin="round"/>
+        <circle cx="52" cy="34" r="2.6" fill="#14213d"/><circle cx="64" cy="34" r="2.6" fill="#14213d"/>
+        <path d="M54 44 Q59 48 64 44" fill="none" stroke="#14213d" stroke-width="2.6" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section class="world theme-glass" id="w3d" hidden aria-label="3D resume world">
+  <canvas id="c3d"></canvas>
+  <div id="panels3d"></div>
+</section>
+</main>
+
+<div class="scrollhint" id="hint" hidden>Scroll or use the arrow keys</div>
+<nav id="dots" aria-label="Resume sections" hidden></nav>
+
+<section id="intro" aria-labelledby="introTitle">
+  <div class="cloud-a"></div><div class="cloud-b"></div>
+  <span class="ribbon">Interactive resume of</span>
+  <h1 id="introTitle">Yefry Núñez</h1>
+  <p class="sub">ML and bioinformatics engineer building AI safety tools in Latin America. Pick how you want to explore.</p>
+  <div class="choices">
+    <button class="choice" type="button" id="pick2d">
+      <svg viewBox="0 0 300 150" aria-hidden="true">
+        <rect width="300" height="150" fill="#9be3fb"/>
+        <circle cx="60" cy="34" r="14" fill="#fff"/><circle cx="80" cy="30" r="18" fill="#fff"/><circle cx="102" cy="36" r="13" fill="#fff"/>
+        <circle cx="220" cy="48" r="11" fill="#fff"/><circle cx="236" cy="44" r="15" fill="#fff"/>
+        <path d="M0 110 C60 50 120 50 170 110 C210 70 260 70 300 110V150H0Z" fill="#5cc36a"/>
+        <rect y="118" width="300" height="32" fill="#8b5a3c"/><rect y="112" width="300" height="10" fill="#7ed957" stroke="#14213d" stroke-width="3"/>
+        <rect x="70" y="72" width="20" height="30" rx="7" fill="#ff9f1c" stroke="#14213d" stroke-width="3"/><circle cx="80" cy="64" r="9" fill="#c68a5e" stroke="#14213d" stroke-width="3"/>
+        <rect x="150" y="60" width="24" height="24" fill="#ffb703" stroke="#14213d" stroke-width="3"/><rect x="190" y="60" width="24" height="24" fill="#ffb703" stroke="#14213d" stroke-width="3"/>
+      </svg>
+      <b>2D</b><span>A flat side-scroller. Walk through my career like a platformer.</span>
+    </button>
+    <button class="choice" type="button" id="pick3d">
+      <svg viewBox="0 0 300 150" aria-hidden="true">
+        <defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2eb5f5"/><stop offset=".6" stop-color="#f9c784"/><stop offset="1" stop-color="#2b2f77"/></linearGradient></defs>
+        <rect width="300" height="150" fill="url(#sk)"/>
+        <g stroke="#14213d" stroke-width="3" stroke-linejoin="round">
+          <path d="M40 38 H110 L98 52 H52Z" fill="#6fdc6b"/><path d="M52 52 H98 L75 84Z" fill="#8b5a3c"/>
+          <path d="M180 66 H262 L248 82 H194Z" fill="#6fdc6b"/><path d="M194 82 H248 L221 118Z" fill="#8b5a3c"/>
+          <path d="M70 108 H128 L119 119 H79Z" fill="#6fdc6b"/><path d="M79 119 H119 L99 142Z" fill="#8b5a3c"/>
+        </g>
+        <circle cx="75" cy="26" r="5" fill="#ff9f1c" stroke="#14213d" stroke-width="2"/>
+      </svg>
+      <b>3D</b><span>Low-poly sky islands. Drop through the clouds, one stop at a time.</span>
+    </button>
+  </div>
+  <button class="linkbtn" type="button" id="skipGal">Skip to the projects gallery</button>
+</section>
+
+<section id="gallery" role="dialog" aria-modal="true" aria-labelledby="galTitle" hidden>
+  <div class="g-in">
+    <div class="g-head">
+      <h2 id="galTitle">Projects</h2>
+      <button class="pill" type="button" id="closeGal">Close</button>
+    </div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<div id="toast" role="status" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+var doc=document.documentElement;
+
+/* ============ DATA ============ */
+var CAT={company:['Company','--c-company'],safety:['AI Safety','--c-safety'],agri:['Agriculture','--c-agri'],sust:['Sustainability','--c-sust'],sim:['Simulation','--c-sim'],health:['Health','--c-health'],web:['Web','--c-web']};
+var EMAIL='yefrynunez45@gmail.com';
+var G={
+  rsce:'<rect x="28" y="22" width="14" height="30"/><rect x="46" y="10" width="14" height="42"/><rect x="64" y="28" width="14" height="24"/>',
+  shield:'<path d="M50 6 L74 15 V30 C74 42 62 50 50 55 C38 50 26 42 26 30 V15Z"/>',
+  cap:'<path d="M50 12 L82 26 L50 40 L18 26Z"/><path d="M32 34 V44 C42 50 58 50 68 44 V34"/>',
+  flask:'<path d="M42 6 H58 M46 6 V24 L28 50 H72 L54 24 V6"/>',
+  play:'<rect x="20" y="10" width="60" height="38" rx="7"/><path d="M44 20 L60 29 L44 38Z"/>',
+  target:'<circle cx="50" cy="30" r="22"/><circle cx="50" cy="30" r="12"/><circle cx="50" cy="30" r="3"/>',
+  leaf:'<path d="M22 48 C22 22 44 10 78 12 C80 40 62 52 36 48Z"/><path d="M26 46 L58 26"/>',
+  cross:'<circle cx="50" cy="30" r="22"/><path d="M50 18 V42 M38 30 H62"/>',
+  doc:'<rect x="30" y="6" width="40" height="48" rx="4"/><path d="M38 18 H62 M38 28 H62 M38 38 H54"/>',
+  recycle:'<path d="M50 8 L74 48 H26Z"/><path d="M40 32 L50 48 L60 32"/>',
+  vr:'<rect x="16" y="16" width="68" height="28" rx="14"/><circle cx="36" cy="30" r="6"/><circle cx="64" cy="30" r="6"/>',
+  lens:'<circle cx="44" cy="26" r="16"/><path d="M56 38 L74 54"/>',
+  road:'<path d="M32 56 L44 4 M68 56 L56 4"/><path d="M50 10 V18 M50 26 V36 M50 44 V52"/>',
+  dna:'<path d="M34 6 C66 18 34 38 66 54 M66 6 C34 18 66 38 34 54"/><path d="M42 14 H58 M40 30 H60 M42 46 H58"/>',
+  route:'<path d="M10 42 L38 30 L60 36 L90 12"/><circle cx="38" cy="30" r="4"/><circle cx="90" cy="12" r="4"/>',
+  shops:'<path d="M14 52 H86 M22 52 V28 H44 V52 M52 52 V14 H78 V52"/>',
+  star:'<path d="M50 6 L58 25 L79 27 L63 41 L68 54 L50 46 L32 54 L37 41 L21 27 L42 25Z"/>',
+  code:'<path d="M36 16 L20 30 L36 44 M64 16 L80 30 L64 44 M54 12 L46 48"/>',
+  layout:'<rect x="18" y="8" width="64" height="44" rx="5"/><path d="M18 20 H82 M34 20 V52"/>'
+};
+var PROJECTS=[
+ {n:'Grupo RSCE',c:'company',u:'https://gruporsce.com/',d:'AI and tech solutions company for Latin America.',g:'rsce',a:'#0a2d48',b:'#1a6db0'},
+ {n:'AISDOM',c:'safety',u:'https://github.com/yefry08/aisdom',d:'First AI safety community in the Dominican Republic.',g:'shield',a:'#0b1a4a',b:'#2a5bd7'},
+ {n:'"Más allá de la IA" Bootcamp',c:'safety',u:'https://github.com/yefry08/aisdom-bootcamp',d:'Bootcamp on AI ethics, safety and responsibility.',g:'cap',a:'#1b1747',b:'#5b49d6'},
+ {n:'Biosecurity LLM Evaluation LAC',c:'safety',u:'https://github.com/yefry08/biosecurity-llm-eval-lac',d:'Dual-use biosecurity risks in LatamGPT and other open-weight LAC models.',g:'flask',a:'#10173a',b:'#2e5fd1'},
+ {n:'AISDOM Live',c:'safety',u:'https://www.youtube.com/live/Jp4cZvKLEvA',d:'AI Safety Dominicana livestream and event.',g:'play',a:'#3a0f2a',b:'#c43b6b'},
+ {n:'C-CropMatch',c:'agri',u:'https://github.com/yefry08/c-cropmatch',d:'Matches land to crops and farming techniques using satellite data.',g:'target',a:'#052e16',b:'#1d7a45'},
+ {n:'Natuvia / CropGPT',c:'agri',u:'https://github.com/yefry08/natuvia-cropgpt',d:'Agricultural AI for food production in extreme environments.',g:'leaf',a:'#0f3a1d',b:'#3aa34f'},
+ {n:'eldoctor · CropGPT',c:'agri',u:'https://eldoctor-cropgpt.static.hf.space/',d:'AI diagnosis and assistance for crops.',g:'cross',a:'#0d3b2a',b:'#27a56b'},
+ {n:'Contractor AI',c:'agri',u:'https://contractor-ai-one.vercel.app/',d:'Multilingual anomaly detection in public procurement.',g:'doc',a:'#07253f',b:'#1b78b8'},
+ {n:'Ready Recycling',c:'sust',u:'https://github.com/yefry08/ready-recycling',d:'Smart waste-sorting bins.',g:'recycle',a:'#05382f',b:'#14a58a'},
+ {n:'3R VR',c:'sust',u:'https://3rvideogame.vercel.app/',d:'Educational VR game about recycling.',g:'vr',a:'#04201c',b:'#0e8f78'},
+ {n:'Missy AI',c:'sust',u:'https://github.com/yefry08/missy-ai',d:'Misinformation detection tool for the UNESCO Youth Hackathon.',g:'lens',a:'#0b2c3a',b:'#1d8aa3'},
+ {n:'DriveRD',c:'sim',u:'https://github.com/yefry08/driverd',d:'2D arcade defensive driving simulator in Santo Domingo.',g:'road',a:'#3a1c07',b:'#d36b1c'},
+ {n:'Barcelona Traffic AI',c:'sim',u:'https://github.com/yefry08/barcelona-traffic-ai',d:'3D AI traffic simulation, AI x City Climate Action Hackathon.',g:'route',a:'#2d1608',b:'#b8561a'},
+ {n:'Rare Disease Real Kid',c:'health',u:'https://github.com/yefry08/mva-hackathon',d:'Rare disease and genomics project, MVA Hackathon.',g:'dna',a:'#3a0b1c',b:'#c93a5c'},
+ {n:'MainstreetAI',c:'web',u:'https://yefry08.github.io/MainstreetAi/',d:'Applied AI project.',g:'shops',a:'#2a1a5e',b:'#7a5af8'},
+ {n:'Proudy',c:'web',u:'https://proudy.vercel.app/',d:'Web project.',g:'star',a:'#2b1260',b:'#9b4fe0'},
+ {n:'Wise of Python',c:'web',u:'https://wise-of-python.vercel.app/',d:'Python learning resource.',g:'code',a:'#1c1b3a',b:'#5a54c9'},
+ {n:'Ubiko',c:'web',u:'https://ubiko.netlify.app/',d:'Web project.',g:'layout',a:'#241a52',b:'#6a52d6'}
+];
+
+var STOPS=[
+ {id:'hero',label:'Start',ac:'--sun'},
+ {id:'about',label:'About',ac:'--c-safety'},
+ {id:'skills',label:'Skills',ac:'--c-agri'},
+ {id:'xp',label:'Experience',ac:'--c-sim'},
+ {id:'edu',label:'Education',ac:'--c-web'},
+ {id:'awards',label:'Recognition',ac:'--c-health'},
+ {id:'projects',label:'Projects',ac:'--c-sust'},
+ {id:'contact',label:'Contact',ac:'--sun'}
+];
+var N=STOPS.length;
+
+function chips(a){return '<ul class="chips">'+a.map(function(x){return '<li class="chip">'+x+'</li>'}).join('')+'</ul>'}
+function panelInner(id){
+  switch(id){
+  case 'hero': return '<span class="eyebrow">Interactive resume</span><h1>Yefry Núñez</h1><p class="role">ML &amp; Bioinformatics Engineer · AI Safety builder</p><p>Founder and president of AI Safety Dominicana. Leader of Grupo RSCE. Based in Latin America.</p>'+chips(['AI safety','Machine learning','Bioinformatics'])+'<p class="hint">Scroll or use the arrow keys to move on.</p>';
+  case 'about': return '<span class="eyebrow">About</span><h2>Hi, I\'m Yefry</h2><p>I\'m a machine learning and bioinformatics engineer from the Dominican Republic. I founded AI Safety Dominicana (AISDOM), the first AI safety community in the country, and I lead Grupo RSCE, an AI and technology company for Latin America.</p><p>Safety and social impact come first in everything I build, from crop diagnosis to procurement transparency.</p>'+chips(['19 projects','Founder','Dominican Republic']);
+  case 'skills': return '<span class="eyebrow">Skills</span><h2>What I work with</h2>'+chips(['Python','Machine learning','Bioinformatics','AI safety evaluations','LLM evaluation','Computer vision','Unity (VR and games)','JavaScript'])+'<p style="margin-top:12px">From genomics pipelines to open-weight model evaluations to games that teach recycling.</p>';
+  case 'xp': return '<span class="eyebrow">Experience</span><h2>Where I\'ve worked</h2><ul class="rows"><li><b>Fundación Enlata · AI Engineer</b><span class="m">Current</span></li><li><b>HackBio · Bioinformatics intern</b><span class="m">Aug 2026 – now</span></li><li><b>AISDOM · Founder and president</b><span class="m">AI safety</span></li><li><b>Grupo RSCE · Leader</b><span class="m">AI and tech</span></li></ul>';
+  case 'edu': return '<span class="eyebrow">Education</span><h2>Learning</h2><ul class="rows"><li><b>BSc Computer Science</b><span class="m">PUCMM · 2024</span></li><li><b>Associate Degree, App Development</b><span class="m">PUCMM</span></li><li><b>Medicine and Biomedicine</b><span class="m">Earlier studies</span></li></ul><div class="sub-h">Courses</div><ul class="rows"><li><b>BlueDot · Technical AI Safety</b><span class="m">2026</span></li><li><b>BlueDot · Transformative AI</b><span class="m">2024</span></li></ul>';
+  case 'awards': return '<span class="eyebrow">Recognition</span><h2>Awards and fellowships</h2><ul class="rows"><li><b>Youth Entrepreneur of the Year</b><span class="m">Dominican Republic · 2025</span></li><li><b>HackCorruption Bogotá · Winner</b><span class="m">2023</span></li><li><b>OAS PIDA Transparency Challenge</b><span class="m">Contractor AI · 2024</span></li><li><b>Billion Acts Fellow</b><span class="m">PeaceJam</span></li><li><b>Founding member</b><span class="m">EA Dominicana</span></li></ul>';
+  case 'projects': return '<span class="eyebrow">Projects</span><h2>'+PROJECTS.length+' things I\'ve built</h2><p>AI safety, agriculture, sustainability, simulation, health and web. Every card in the gallery opens the real project.</p><div class="btnrow"><button class="btn" type="button" data-open-gallery>Open the gallery</button></div>';
+  case 'contact': return '<span class="eyebrow">Contact</span><h2>Say hello</h2><p>Open to AI safety, ML and bioinformatics collaborations.</p><code class="mail" id="mailtxt-%ID%">'+EMAIL+'</code><div class="btnrow"><button class="btn" type="button" data-copy>Copy email</button><a class="btn alt" href="https://github.com/yefry08" target="_blank" rel="noopener">GitHub</a><a class="btn alt" href="mailto:'+EMAIL+'">Write an email</a></div>';
+  }
+  return '';
+}
+function panelHTML(s,i,k){return '<article class="panel card" data-i="'+i+'" style="--ac:var('+s.ac+')">'+panelInner(s.id).replace('%ID%',k+i)+'</article>'}
+
+/* ============ STATE ============ */
+var mode=null, sp=0, active=0, S=800, charX=300, groundH=150;
+var three=null, galleryOpen=false, lastFocus=null;
+var panels2d=[], panels3d=[], stops2d=[];
+
+function maxScroll(){return Math.max(1,doc.scrollHeight-innerHeight)}
+function prog(){return Math.min(1,Math.max(0,(window.scrollY||doc.scrollTop||0)/maxScroll()))}
+function goTo(i){
+  i=Math.max(0,Math.min(N-1,i));
+  window.scrollTo({top:i/(N-1)*maxScroll(),behavior:reduce?'auto':'smooth'});
+}
+function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},3600)}
+function lockScroll(on){doc.style.overflow=on?'hidden':''}
+
+/* ============ GALLERY ============ */
+var filter='all';
+function renderGallery(){
+  var f=$('#filters');
+  var cats=Object.keys(CAT);
+  f.innerHTML=['all'].concat(cats).map(function(k){
+    var label=k==='all'?'All ('+PROJECTS.length+')':CAT[k][0];
+    return '<button type="button" data-f="'+k+'" aria-pressed="'+(filter===k)+'">'+label+'</button>';
+  }).join('');
+  $('#grid').innerHTML=PROJECTS.filter(function(p){return filter==='all'||p.c===filter}).map(function(p){
+    var host=p.u.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'');
+    return '<a class="tile" href="'+p.u+'" target="_blank" rel="noopener" style="--ac:var('+CAT[p.c][1]+')">'+
+      '<div class="thumb" style="background:linear-gradient(135deg,'+p.a+','+p.b+')"><div class="top"><i></i><i></i><i></i><span>'+host+'</span></div><svg viewBox="0 0 100 60" aria-hidden="true">'+G[p.g]+'</svg></div>'+
+      '<div class="meta"><span class="tag">'+CAT[p.c][0]+'</span><b>'+p.n+'</b><span>'+p.d+'</span></div></a>';
+  }).join('');
+}
+function openGallery(){
+  if(galleryOpen)return;
+  galleryOpen=true;lastFocus=document.activeElement;
+  renderGallery();
+  $('#gallery').hidden=false;lockScroll(true);
+  $('#gallery').scrollTop=0;
+  $('#closeGal').focus();
+}
+function closeGallery(){
+  if(!galleryOpen)return;
+  galleryOpen=false;$('#gallery').hidden=true;
+  if(!$('#intro').hidden||!mode){} else lockScroll(false);
+  if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}
+}
+$('#filters').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-f]');if(!b)return;filter=b.getAttribute('data-f');renderGallery();
+});
+$('#openGal').addEventListener('click',openGallery);
+$('#closeGal').addEventListener('click',closeGallery);
+$('#skipGal').addEventListener('click',openGallery);
+document.addEventListener('click',function(e){
+  if(e.target.closest('[data-open-gallery]'))openGallery();
+  var c=e.target.closest('[data-copy]');
+  if(c){
+    var txt=c.parentNode.previousElementSibling;
+    var done=function(ok){c.textContent=ok?'Copied':'Select and copy';setTimeout(function(){c.textContent='Copy email'},2200)};
+    try{navigator.clipboard.writeText(EMAIL).then(function(){done(true)},function(){sel(txt);done(false)})}catch(err){sel(txt);done(false)}
+  }
+});
+function sel(el){try{var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r)}catch(e){}}
+
+/* ============ 2D WORLD ============ */
+var svgURL=function(s){return 'url("data:image/svg+xml,'+encodeURIComponent(s)+'")'};
+function cloud(x,y,s){return '<g transform="translate('+x+' '+y+') scale('+s+')" fill="#fff"><circle cx="40" cy="40" r="26"/><circle cx="76" cy="30" r="32"/><circle cx="116" cy="42" r="24"/><rect x="14" y="40" width="124" height="26" rx="13"/></g>'}
+function tree(x,h,c){return '<rect x="'+(x-9)+'" y="'+(260-h*.45)+'" width="18" height="'+(h*.45)+'" fill="#8b5a3c" stroke="#14213d" stroke-width="4"/><circle cx="'+x+'" cy="'+(260-h*.6)+'" r="'+(h*.34)+'" fill="'+c+'" stroke="#14213d" stroke-width="4"/>'}
+function build2D(){
+  $('#l-clouds').style.backgroundImage=svgURL('<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="320" viewBox="0 0 1400 320">'+cloud(80,40,1)+cloud(520,170,.7)+cloud(860,30,1.2)+cloud(1200,180,.8)+'</svg>');
+  $('#l-hills').style.backgroundImage=svgURL('<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300"><path d="M0 300 V170 C120 60 280 60 400 170 C520 100 700 90 1000 170 V300Z" fill="#6fd16f" stroke="#14213d" stroke-width="4"/><path d="M0 300 V230 C200 140 360 150 520 230 C700 160 860 170 1000 230 V300Z" fill="#4fb85f" stroke="#14213d" stroke-width="4"/></svg>');
+  $('#l-trees').style.backgroundImage=svgURL('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="260" viewBox="0 0 800 260">'+tree(90,190,'#38b36b')+tree(250,130,'#4fc77a')+tree(470,210,'#2fa05e')+tree(650,150,'#38b36b')+'</svg>');
+  var w=$('#l-world');var h='';
+  var props={
+    hero:'<g stroke="#14213d" stroke-width="4" stroke-linejoin="round"><path d="M40 146 V16" fill="none"/><path d="M42 18 H128 L112 40 L128 62 H42Z" fill="#ff5d73"/><circle cx="40" cy="14" r="8" fill="#ffb703"/></g><text class="svgt" x="52" y="47" font-size="22" fill="#fff">START</text>',
+    about:'<g stroke="#14213d" stroke-width="4" stroke-linejoin="round"><path d="M20 146 V72 H150 V146Z" fill="#fff4d6"/><path d="M8 76 L85 14 L162 76Z" fill="#ff5d73"/><rect x="68" y="98" width="34" height="48" fill="#4d8dff"/><rect x="28" y="86" width="28" height="26" fill="#9fe3ff"/><rect x="114" y="86" width="28" height="26" fill="#9fe3ff"/></g>',
+    skills:'<g stroke="#14213d" stroke-width="4"><rect x="6" y="56" width="46" height="46" fill="#ffb703"/><rect x="62" y="56" width="46" height="46" fill="#ffb703"/><rect x="118" y="56" width="46" height="46" fill="#ffb703"/></g><g class="svgt" font-size="30" fill="#14213d" text-anchor="middle"><text x="29" y="89">?</text><text x="85" y="89">?</text><text x="141" y="89">?</text></g>',
+    xp:'<g stroke="#14213d" stroke-width="4" stroke-linejoin="round"><path d="M62 54 V38 Q62 28 72 28 H98 Q108 28 108 38 V54" fill="none"/><rect x="20" y="52" width="130" height="94" rx="12" fill="#c98a4a"/><path d="M20 90 H150" fill="none"/><rect x="73" y="82" width="24" height="18" rx="4" fill="#ffb703"/></g>',
+    edu:'<g stroke="#14213d" stroke-width="4" stroke-linejoin="round"><rect x="14" y="64" width="142" height="82" fill="#e6f0ff"/><path d="M6 68 L85 22 L164 68Z" fill="#4d8dff"/><rect x="30" y="80" width="14" height="66" fill="#fff"/><rect x="58" y="80" width="14" height="66" fill="#fff"/><rect x="98" y="80" width="14" height="66" fill="#fff"/><rect x="126" y="80" width="14" height="66" fill="#fff"/><path d="M85 22 V2" fill="none"/><path d="M85 3 H110 L102 10 L110 17 H85Z" fill="#ff5d73"/></g>',
+    awards:'<g stroke="#14213d" stroke-width="4" stroke-linejoin="round"><rect x="58" y="72" width="54" height="74" fill="#ffb703"/><rect x="6" y="102" width="52" height="44" fill="#c9d4e6"/><rect x="112" y="114" width="52" height="32" fill="#e0a070"/><path d="M85 8 L92 26 L111 27 L96 39 L101 57 L85 47 L69 57 L74 39 L59 27 L78 26Z" fill="#ffd166"/></g><g class="svgt" font-size="26" fill="#14213d" text-anchor="middle"><text x="85" y="108">1</text><text x="32" y="132">2</text><text x="138" y="137">3</text></g>',
+    projects:'<g stroke="#14213d" stroke-width="4" stroke-linejoin="round"><path d="M24 146 V68 A61 61 0 0 1 146 68 V146Z" fill="#7a5af8"/><path d="M44 146 V70 A41 41 0 0 1 126 70 V146Z" fill="#14213d"/></g><g fill="#ffd166"><circle cx="70" cy="86" r="3"/><circle cx="102" cy="104" r="2.5"/><circle cx="84" cy="124" r="3"/><circle cx="108" cy="80" r="2"/></g><g class="svgt" font-size="15" fill="#ffd166" text-anchor="middle"><text x="85" y="74">OPEN</text><text x="85" y="92">GALLERY</text></g>',
+    contact:'<g stroke="#14213d" stroke-width="4" stroke-linejoin="round"><rect x="78" y="94" width="14" height="52" fill="#8b5a3c"/><path d="M36 98 V66 A49 30 0 0 1 134 66 V98Z" fill="#ff5d73"/><rect x="112" y="30" width="6" height="40" fill="#14213d"/><rect x="118" y="30" width="22" height="14" fill="#ffb703"/><rect x="56" y="74" width="40" height="8" rx="4" fill="#14213d"/></g>'
+  };
+  STOPS.forEach(function(s,i){
+    var propEl=s.id==='projects'
+      ? '<button class="prop" type="button" data-open-gallery aria-label="Open the projects gallery"><svg viewBox="0 0 170 150">'+props[s.id]+'</svg></button>'
+      : '<svg class="prop" viewBox="0 0 170 150" aria-hidden="true">'+props[s.id]+'</svg>';
+    h+='<div class="stop2d" data-i="'+i+'">'+propEl+panelHTML(s,i,'a')+'</div>';
+  });
+  w.innerHTML=h;
+  stops2d=[].slice.call(w.querySelectorAll('.stop2d'));
+  panels2d=stops2d.map(function(el){return el.querySelector('.panel')});
+}
+
+/* ============ 3D WORLD ============ */
+var Y_STEP=14;
+function build3D(){
+  if(!window.THREE)return null;
+  var canvas=$('#c3d'),renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true})}catch(e){return null}
+  if(!renderer||!renderer.getContext())return null;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
+  var scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0x37b6f2,26,80);
+  var cam=new THREE.PerspectiveCamera(42,1,.1,220);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x8a9bb8,.95));
+  var sun=new THREE.DirectionalLight(0xfff2d6,.95);sun.position.set(6,12,9);scene.add(sun);
+
+  function M(c,o){var m=new THREE.MeshStandardMaterial({color:c,flatShading:true,roughness:.95,metalness:0});if(o)for(var k in o)m[k]=o[k];return m}
+  function mesh(g,m,x,y,z){var o=new THREE.Mesh(g,m);o.position.set(x||0,y||0,z||0);return o}
+  var rnd=(function(s){return function(){s=(s*16807)%2147483647;return (s-1)/2147483646}})(7);
+
+  function island(r){
+    var g=new THREE.Group();
+    g.add(mesh(new THREE.CylinderGeometry(r,r*.94,.7,8),M(0x6fdc6b)));
+    g.add(mesh(new THREE.CylinderGeometry(r*.94,r*.9,.35,8),M(0x9a6a43),0,-.52,0));
+    var cone=mesh(new THREE.ConeGeometry(r*.9,r*1.9,8),M(0x8b5a3c),0,-.7-r*.95,0);cone.rotation.x=Math.PI;g.add(cone);
+    for(var i=0;i<5;i++){
+      var a=i/5*Math.PI*2+.4,rr=r*(.62+rnd()*.25);
+      g.add(mesh(new THREE.IcosahedronGeometry(.16+rnd()*.2,0),M(0xbab7cf),Math.cos(a)*rr,.4,Math.sin(a)*rr));
+    }
+    return g;
+  }
+  function pine(x,z,s){
+    var t=new THREE.Group();
+    t.add(mesh(new THREE.CylinderGeometry(.08*s,.1*s,.5*s,5),M(0x7a4a2b),0,.25*s,0));
+    t.add(mesh(new THREE.ConeGeometry(.5*s,.9*s,6),M(0x2fa05e),0,.85*s,0));
+    t.add(mesh(new THREE.ConeGeometry(.38*s,.7*s,6),M(0x38b36b),0,1.3*s,0));
+    t.position.set(x,.35,z);return t;
+  }
+
+  /* character */
+  var hero=new THREE.Group(),armL,armR,head;
+  (function(){
+    var skin=M(0xc68a5e),shirt=M(0xff9f1c),jeans=M(0x2f6fed),shoe=M(0xffffff),hair=M(0x1b1b1b);
+    hero.add(mesh(new THREE.BoxGeometry(.3,.9,.34),jeans,-.2,.45,0));
+    hero.add(mesh(new THREE.BoxGeometry(.3,.9,.34),jeans,.2,.45,0));
+    hero.add(mesh(new THREE.BoxGeometry(.34,.16,.5),shoe,-.2,.08,.08));
+    hero.add(mesh(new THREE.BoxGeometry(.34,.16,.5),shoe,.2,.08,.08));
+    hero.add(mesh(new THREE.BoxGeometry(.95,1.1,.55),shirt,0,1.45,0));
+    armL=new THREE.Group();armL.position.set(-.62,1.9,0);armL.add(mesh(new THREE.BoxGeometry(.26,.95,.3),shirt,0,-.42,0));armL.add(mesh(new THREE.IcosahedronGeometry(.17,0),skin,0,-.95,0));hero.add(armL);
+    armR=new THREE.Group();armR.position.set(.62,1.9,0);armR.add(mesh(new THREE.BoxGeometry(.26,.95,.3),shirt,0,-.42,0));armR.add(mesh(new THREE.IcosahedronGeometry(.17,0),skin,0,-.95,0));hero.add(armR);
+    head=new THREE.Group();head.position.set(0,2.4,0);
+    head.add(mesh(new THREE.IcosahedronGeometry(.45,1),skin));
+    var hr=mesh(new THREE.IcosahedronGeometry(.48,1),hair,0,.12,-.05);hr.scale.set(1,.7,1);head.add(hr);
+    head.add(mesh(new THREE.BoxGeometry(.08,.1,.05),M(0x14213d),-.16,0,.43));
+    head.add(mesh(new THREE.BoxGeometry(.08,.1,.05),M(0x14213d),.16,0,.43));
+    hero.add(head);
+  })();
+  hero.scale.setScalar(1.05);hero.position.set(0,.35,0);
+
+  var props=[];
+  var islands=[];
+  var narrow=false;
+  var skillOrbit=null,globe=null,starsG=null,portal=null,portalRing=null,portalCards=null,pinsG=null;
+
+  STOPS.forEach(function(s,i){
+    var isl=island(2.6);var g=new THREE.Group();g.add(isl);
+    var p=new THREE.Group();p.position.y=.35;
+    if(s.id==='hero'){p.add(hero);hero.position.y=0;p.add(pine(-1.7,-.6,1));p.add(pine(1.8,-1,.8));}
+    if(s.id==='about'){
+      p.add(mesh(new THREE.BoxGeometry(1.7,1.2,1.5),M(0xfff4d6),0,.6,0));
+      var roof=mesh(new THREE.ConeGeometry(1.45,.95,4),M(0xff5d73),0,1.65,0);roof.rotation.y=Math.PI/4;p.add(roof);
+      p.add(mesh(new THREE.BoxGeometry(.4,.7,.06),M(0x4d8dff),0,.35,.78));
+      p.add(mesh(new THREE.BoxGeometry(.36,.36,.06),M(0x9fe3ff),-.55,.8,.78));p.add(mesh(new THREE.BoxGeometry(.36,.36,.06),M(0x9fe3ff),.55,.8,.78));
+      p.add(pine(-1.8,.5,1.1));p.add(pine(1.7,.9,.9));
+    }
+    if(s.id==='skills'){
+      skillOrbit=new THREE.Group();skillOrbit.position.y=1.3;
+      var cols=[0xffb703,0x4d8dff,0xff5d73,0x4cd17a,0x9b7bff,0x1fc8a8];
+      cols.forEach(function(c,k){var a=k/6*Math.PI*2;var cb=mesh(new THREE.BoxGeometry(.75,.75,.75),M(c),Math.cos(a)*1.6,Math.sin(k*1.7)*.4,Math.sin(a)*1.6);skillOrbit.add(cb)});
+      p.add(skillOrbit);p.add(pine(0,0,1.2));
+    }
+    if(s.id==='xp'){
+      globe=new THREE.Group();globe.position.y=1.9;
+      globe.add(mesh(new THREE.IcosahedronGeometry(1.35,1),M(0x2a9d8f)));
+      globe.add(mesh(new THREE.IcosahedronGeometry(1.4,1),new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:.3})));
+      p.add(globe);p.add(mesh(new THREE.CylinderGeometry(.5,.7,.3,6),M(0x8b5a3c),0,.15,0));
+    }
+    if(s.id==='edu'){
+      p.add(mesh(new THREE.BoxGeometry(2.6,.2,1.9),M(0xd8dde8),0,.1,0));
+      p.add(mesh(new THREE.BoxGeometry(2.3,1.1,1.5),M(0xe6f0ff),0,.75,0));
+      for(var k=0;k<4;k++)p.add(mesh(new THREE.CylinderGeometry(.11,.11,1.1,6),M(0xffffff),-.85+k*.57,.75,.85));
+      var r2=mesh(new THREE.ConeGeometry(1.55,.8,3),M(0x4d8dff),0,1.7,0);r2.rotation.y=Math.PI/2;r2.scale.set(1,1,.62);p.add(r2);
+      p.add(mesh(new THREE.CylinderGeometry(.03,.03,.9,4),M(0x14213d),0,2.5,0));
+      p.add(mesh(new THREE.BoxGeometry(.5,.28,.03),M(0xff5d73),.26,2.76,0));
+    }
+    if(s.id==='awards'){
+      var gold=M(0xffd166,{emissive:new THREE.Color(0x553a00),roughness:.4});
+      p.add(mesh(new THREE.BoxGeometry(1.1,.35,1.1),M(0x8b5a3c),0,.17,0));
+      p.add(mesh(new THREE.CylinderGeometry(.14,.2,.7,8),gold,0,.7,0));
+      p.add(mesh(new THREE.CylinderGeometry(.75,.38,.95,8),gold,0,1.5,0));
+      var t1=mesh(new THREE.TorusGeometry(.38,.07,5,10),gold,-.8,1.55,0);var t2=mesh(new THREE.TorusGeometry(.38,.07,5,10),gold,.8,1.55,0);p.add(t1);p.add(t2);
+      starsG=new THREE.Group();starsG.position.y=1.7;
+      for(var k=0;k<5;k++){var a=k/5*Math.PI*2;starsG.add(mesh(new THREE.OctahedronGeometry(.17,0),gold,Math.cos(a)*1.5,Math.sin(a*2)*.3,Math.sin(a)*1.5))}
+      p.add(starsG);
+    }
+    if(s.id==='projects'){
+      portal=new THREE.Group();
+      var stone=M(0x5b4bb5);
+      portal.add(mesh(new THREE.BoxGeometry(.4,2.6,.5),stone,-1.2,1.3,0));
+      portal.add(mesh(new THREE.BoxGeometry(.4,2.6,.5),stone,1.2,1.3,0));
+      portal.add(mesh(new THREE.BoxGeometry(2.8,.4,.5),stone,0,2.7,0));
+      portalRing=mesh(new THREE.TorusGeometry(.95,.1,6,18),new THREE.MeshBasicMaterial({color:0xb79cff}),0,1.4,0);portal.add(portalRing);
+      var disc=mesh(new THREE.CircleGeometry(.9,18),new THREE.MeshBasicMaterial({color:0x7a5af8,transparent:true,opacity:.55,side:THREE.DoubleSide}),0,1.4,0);portal.add(disc);
+      portalCards=new THREE.Group();portalCards.position.y=1.5;
+      [0xffb703,0x4cd17a,0xff5d73,0x4d8dff].forEach(function(c,k){var a=k/4*Math.PI*2;var cd=mesh(new THREE.BoxGeometry(.7,.45,.05),new THREE.MeshBasicMaterial({color:c}),Math.cos(a)*1.9,Math.sin(a*1.3)*.4,Math.sin(a)*1.9);portalCards.add(cd)});
+      portal.add(portalCards);portal.position.z=-.2;
+      p.add(portal);
+    }
+    if(s.id==='contact'){
+      p.add(mesh(new THREE.BoxGeometry(.22,1.3,.22),M(0x8b5a3c),0,.65,0));
+      var mb=mesh(new THREE.BoxGeometry(1.2,.75,1.7),M(0xff5d73),0,1.55,0);p.add(mb);
+      var cap=mesh(new THREE.CylinderGeometry(.6,.6,1.7,10,1,false,0,Math.PI),M(0xff5d73),0,1.92,0);cap.rotation.x=Math.PI/2;cap.rotation.z=Math.PI/2;
+      p.add(mesh(new THREE.BoxGeometry(.06,.5,.3),M(0xffb703),.68,1.9,.2));
+      p.add(mesh(new THREE.BoxGeometry(.5,.05,.05),M(0x14213d),0,1.55,.9));
+      var plane=mesh(new THREE.ConeGeometry(.28,.8,3),M(0xffffff),1.6,2.8,0);plane.rotation.z=-Math.PI/2.4;plane.scale.set(1,1,.35);p.add(plane);props.plane=plane;
+      p.add(pine(-1.8,.4,1));
+    }
+    g.add(p);scene.add(g);islands.push(g);
+  });
+
+  /* sky: clouds + stars */
+  var cloudMat=M(0xffffff);var clouds=[];
+  var totalH=(N-1)*Y_STEP;
+  for(var i=0;i<34;i++){
+    var c=new THREE.Group();
+    [[0,0,0,1],[.9,.15,0,1.2],[1.8,0,.2,.9],[.9,-.15,.6,.8]].forEach(function(b){
+      var m=mesh(new THREE.IcosahedronGeometry(.8*b[3],0),cloudMat,b[0],b[1],b[2]);m.scale.y=.7;c.add(m);
+    });
+    c.position.set(-18+rnd()*36,6-rnd()*(totalH+14),-14+rnd()*16);
+    c.scale.setScalar(.8+rnd()*1.2);c.userData.v=.12+rnd()*.25;
+    scene.add(c);clouds.push(c);
+  }
+  var sg=new THREE.BufferGeometry();var sp3=[];
+  for(var i=0;i<420;i++){var th=rnd()*Math.PI*2,ph=Math.acos(2*rnd()-1),R=55;sp3.push(R*Math.sin(ph)*Math.cos(th),R*Math.sin(ph)*Math.sin(th),-Math.abs(R*Math.cos(ph))-5)}
+  sg.setAttribute('position',new THREE.Float32BufferAttribute(sp3,3));
+  var starMat=new THREE.PointsMaterial({color:0xffffff,size:.35,transparent:true,opacity:0,fog:false});
+  var stars=new THREE.Points(sg,starMat);scene.add(stars);
+
+  var skyCols=['#35b4f2','#52c1f6','#86d3f2','#f6c27e','#ef8f8f','#7366cf','#2b2f77','#0b1030'].map(function(h){return new THREE.Color(h)});
+  var tmp=new THREE.Color(),cloudDay=new THREE.Color(0xffffff),cloudNight=new THREE.Color(0x8a90c8);
+  function sky(t){
+    var a=Math.min(N-2,Math.floor(t)),f=t-a;
+    tmp.copy(skyCols[a]).lerp(skyCols[a+1],f);
+    renderer.setClearColor(tmp,1);scene.fog.color.copy(tmp);
+    starMat.opacity=Math.max(0,Math.min(1,(t-4.5)/2.4));
+    cloudMat.color.copy(cloudDay).lerp(cloudNight,Math.max(0,Math.min(1,(t-3)/4)));
+  }
+
+  function layout(){
+    var w=innerWidth,h=innerHeight;
+    renderer.setSize(w,h,false);
+    cam.aspect=w/h;
+    narrow=w<760||w/h<.85;
+    cam.fov=narrow?48:42;cam.updateProjectionMatrix();
+    islands.forEach(function(g,i){
+      g.position.set(narrow?0:(i%2===0?3.7:-3.7),-i*Y_STEP,0);
+    });
+    document.querySelectorAll('.p3').forEach(function(el,i){el.classList.toggle('left',i%2===0);el.classList.toggle('right',i%2!==0)});
+  }
+
+  var mx=0,my=0,raycaster=new THREE.Raycaster(),ptr=new THREE.Vector2();
+  window.addEventListener('pointermove',function(e){mx=e.clientX/innerWidth*2-1;my=e.clientY/innerHeight*2-1});
+  function hitPortal(e){
+    if(!portal)return false;
+    var r=canvas.getBoundingClientRect();
+    ptr.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height*2-1));
+    raycaster.setFromCamera(ptr,cam);
+    return raycaster.intersectObject(portal,true).length>0;
+  }
+  canvas.addEventListener('pointerdown',function(e){if(hitPortal(e))openGallery()});
+  canvas.addEventListener('pointermove',function(e){canvas.style.cursor=hitPortal(e)?'pointer':'default'});
+
+  var camX=0;
+  function frame(t,time){
+    sky(t);
+    var camY=-t*Y_STEP+(narrow?-2.6:0);
+    camX+=((mx*.9)-camX)*.05;
+    cam.position.set(narrow?0:camX,camY+(narrow?0:-my*.4),narrow?18:14.5);
+    cam.lookAt(narrow?0:camX*.3,camY,0);
+    stars.position.y=camY;
+    var tt=time/1000;
+    islands.forEach(function(g,i){
+      g.position.y=-i*Y_STEP+(reduce?0:Math.sin(tt*.9+i*1.3)*.2);
+      g.rotation.y=(reduce?0:Math.sin(tt*.3+i)*.28)+(t-i)*(narrow?.25:-.35);
+    });
+    if(!reduce){
+      armL.rotation.x=Math.sin(tt*1.6)*.1;armR.rotation.x=-Math.sin(tt*1.6)*.1;
+      head.rotation.y=mx*.5;head.rotation.x=my*.2;
+      if(skillOrbit){skillOrbit.rotation.y=tt*.6;skillOrbit.children.forEach(function(c,k){c.rotation.x=tt*.8+k;c.rotation.y=tt*.6+k})}
+      if(globe)globe.rotation.y=tt*.4;
+      if(starsG){starsG.rotation.y=tt*.7}
+      if(portalRing)portalRing.rotation.z=tt*.8;
+      if(portalCards)portalCards.rotation.y=-tt*.5;
+      if(props.plane){props.plane.position.x=1.6+Math.sin(tt)*.4;props.plane.position.y=2.8+Math.cos(tt*1.3)*.2}
+      clouds.forEach(function(c){c.position.x+=c.userData.v*.016;if(c.position.x>20)c.position.x=-20});
+    }
+    renderer.render(scene,cam);
+  }
+  layout();
+  return {layout:layout,frame:frame};
+}
+
+/* ============ SHARED LOOP ============ */
+function build3Dpanels(){
+  var host=$('#panels3d');
+  host.innerHTML=STOPS.map(function(s,i){return '<div class="p3 '+(i%2===0?'left':'right')+'">'+panelHTML(s,i,'b')+'</div>'}).join('');
+  panels3d=[].slice.call(host.querySelectorAll('.panel'));
+}
+function buildDots(){
+  $('#dots').innerHTML=STOPS.map(function(s,i){return '<button type="button" data-g="'+i+'" aria-label="'+s.label+'" title="'+s.label+'"></button>'}).join('');
+}
+$('#dots').addEventListener('click',function(e){var b=e.target.closest('button[data-g]');if(b)goTo(+b.getAttribute('data-g'))});
+
+function measure(){
+  var w=innerWidth,h=innerHeight;
+  charX=w<700?w*.22:Math.max(130,w*.26);
+  groundH=Math.max(110,Math.min(190,h*.2));
+  S=Math.max(w*.9,720);
+  var w2=$('#w2d');w2.style.setProperty('--charx',charX+'px');w2.style.setProperty('--groundh',groundH+'px');
+  stops2d.forEach(function(el,i){el.style.left=(i*S+charX)+'px'});
+  $('#scroller').style.height=((N-1)*Math.round(h*.85)+h)+'px';
+  if(three)three.layout();
+}
+function opac(d){return Math.max(0,Math.min(1,1-Math.abs(d)*2.3))}
+var lastActive=-1,walkT=0;
+function tick(time){
+  requestAnimationFrame(tick);
+  if(!mode||galleryOpen)return;
+  var p=prog();
+  var diff=p-sp;
+  sp+=diff*.14;if(Math.abs(p-sp)<.00008)sp=p;
+  var t=sp*(N-1);
+  var a=Math.round(t);if(a!==active){active=a}
+  if(mode==='2d'){
+    var off=t*S;
+    $('#l-world').style.transform='translate3d('+(-off)+'px,0,0)';
+    $('#l-clouds').style.backgroundPositionX=(-off*.12)+'px';
+    $('#l-hills').style.backgroundPositionX=(-off*.3)+'px';
+    $('#l-trees').style.backgroundPositionX=(-off*.6)+'px';
+    $('#grass').style.backgroundPositionX=(-off)+'px';
+    $('#dirt').style.backgroundPositionX=(-off)+'px';
+    var walking=Math.abs(diff)>.0006;
+    $('#hero2d').classList.toggle('walking',walking&&!reduce);
+    panels2d.forEach(function(el,i){var o=opac(t-i);el.style.opacity=o;el.style.transform='translateY('+((1-o)*14)+'px)';el.classList.toggle('on',o>.5)});
+  }else if(three){
+    three.frame(t,time);
+    panels3d.forEach(function(el,i){var o=opac(t-i);el.style.opacity=o;el.style.transform='translateY('+((1-o)*14)+'px)';el.classList.toggle('on',o>.5)});
+  }
+  if(a!==lastActive){
+    lastActive=a;
+    [].forEach.call($('#dots').children,function(b,i){if(i===a)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+  }
+  $('#hint').style.opacity=p<.02?1:0;
+}
+
+/* ============ MODE ============ */
+function setMode(m){
+  if(m==='3d'){
+    if(!three){
+      build3Dpanels();
+      three=build3D();
+      if(!three){$('#panels3d').innerHTML='';panels3d=[];toast('3D needs WebGL, which is not available here. Showing 2D instead.');m='2d'}
+    }
+  }
+  mode=m;
+  $('#w2d').hidden=m!=='2d';$('#w3d').hidden=m!=='3d';
+  $('#m2d').setAttribute('aria-pressed',m==='2d');$('#m3d').setAttribute('aria-pressed',m==='3d');
+  $('#bar').hidden=false;$('#dots').hidden=false;$('#hint').hidden=false;
+  $('#intro').hidden=true;lockScroll(false);
+  measure();
+  lastActive=-1;
+  sp=prog();
+}
+$('#pick2d').addEventListener('click',function(){window.scrollTo(0,0);setMode('2d')});
+$('#pick3d').addEventListener('click',function(){window.scrollTo(0,0);setMode('3d')});
+$('#m2d').addEventListener('click',function(){setMode('2d')});
+$('#m3d').addEventListener('click',function(){setMode('3d')});
+$('#brand').addEventListener('click',function(){$('#intro').hidden=false;lockScroll(true);mode=null;$('#w2d').hidden=true;$('#w3d').hidden=true;$('#bar').hidden=true;$('#dots').hidden=true;$('#hint').hidden=true;$('#pick2d').focus()});
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&galleryOpen){closeGallery();return}
+  if(!mode||galleryOpen)return;
+  var tag=(e.target&&e.target.tagName)||'';if(/INPUT|TEXTAREA|SELECT/.test(tag))return;
+  var k=e.key;
+  if(k==='ArrowRight'||k==='ArrowDown'||k==='PageDown'){e.preventDefault();goTo(Math.round(sp*(N-1))+1)}
+  else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();goTo(Math.round(sp*(N-1))-1)}
+  else if(k==='Home'){e.preventDefault();goTo(0)}
+  else if(k==='End'){e.preventDefault();goTo(N-1)}
+});
+window.addEventListener('resize',function(){if(mode||true)measure()});
+
+/* ============ BOOT ============ */
+build2D();
+buildDots();
+measure();
+lockScroll(true);
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
